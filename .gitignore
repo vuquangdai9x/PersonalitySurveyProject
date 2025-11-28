@@ -1,0 +1,25 @@
+# Node artifacts
+node_modules/
+npm-debug.log*
+package-lock.json
+yarn.lock
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+
+# Local env
+.env
+
+# Build outputs
+dist/
+build/
+
+# Misc
+*.log
+
+# Ignore output files
+*.csv
