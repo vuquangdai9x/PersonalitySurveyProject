@@ -30,7 +30,6 @@ const modal = document.getElementById('modal');
 const modalWord = document.getElementById('modal-word');
 const ratingForm = document.getElementById('rating-form');
 const cancelBtn = document.getElementById('cancel');
-const themeToggle = document.getElementById('themeToggle');
 
 const ctx = canvas.getContext('2d');
 
@@ -126,15 +125,6 @@ function bindControls(){
     panelToggle.addEventListener('click', ()=>{
       const isMin = panel.classList.toggle('minimized');
       panelToggle.setAttribute('aria-expanded', String(!isMin));
-    });
-  }
-  // theme toggle
-  if(themeToggle){
-    themeToggle.addEventListener('click', ()=>{
-      const isLight = document.body.classList.toggle('light');
-      LIGHTNESS_FACTOR = 1 - Number(LIGHTNESS_FACTOR);
-      if(lSlider) lSlider.value = Number(LIGHTNESS_FACTOR);
-      if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
     });
   }
 }
