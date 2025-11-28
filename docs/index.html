@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Floating Words — Rating Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="stage"></canvas>
+  <div id="control-panel" aria-hidden="false">
+    <label>X randomness: <span id="xVal">1.0</span></label>
+    <input id="xSlider" type="range" min="0" max="1" step="0.01" value="1">
+    <label>Y randomness: <span id="yVal">1.0</span></label>
+    <input id="ySlider" type="range" min="0" max="1" step="0.01" value="1">
+    <label>Lightness: <span id="lVal">1.0</span></label>
+    <input id="lSlider" type="range" min="0" max="1" step="0.01" value="1">
+    <button id="applyBtn">Apply</button>
+  </div>
+
+  <div id="modal" class="hidden" role="dialog" aria-modal="true">
+    <div class="modal-inner survey-modal">
+      <form id="rating-form">
+        <div class="survey-question" id="modal-word">Theo bạn, thực tế bản thân đã đạt được hình ảnh lý tưởng tới mức nào</div>
+
+        <div class="rating-row">
+          <div class="rating-side rating-left">Không hề giống</div>
+
+          <div class="rating-center">
+            <div class="rating-numbers">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+            </div>
+            <div class="rating-radios">
+              <button type="button" class="rating-btn" data-value="1">1</button>
+              <button type="button" class="rating-btn" data-value="2">2</button>
+              <button type="button" class="rating-btn" data-value="3" data-default="true">3</button>
+              <button type="button" class="rating-btn" data-value="4">4</button>
+              <button type="button" class="rating-btn" data-value="5">5</button>
+            </div>
+          </div>
+
+          <div class="rating-side rating-right">Rất giống</div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancel">Hủy</button>
+          <button type="submit" id="submit">Gửi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
