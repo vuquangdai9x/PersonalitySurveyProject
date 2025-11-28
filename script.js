@@ -179,9 +179,9 @@ async function loadConfigAndWords(){
   const fontSize = Math.max(12, Math.min(28, Math.round(window.innerWidth / 40)));
   const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
 
-  // clamp randomness to 0..1
-  X_RANDOMNESS = Math.min(1, Math.max(0, Number(X_RANDOMNESS) || 0));
-  Y_RANDOMNESS = Math.min(1, Math.max(0, Number(Y_RANDOMNESS) || 0));
+  // clamp randomness to 0..20 (slider ranges 0..20)
+  X_RANDOMNESS = Math.min(20, Math.max(0, Number(X_RANDOMNESS) || 0));
+  Y_RANDOMNESS = Math.min(20, Math.max(0, Number(Y_RANDOMNESS) || 0));
 
   // determine grid size
   const cols = Math.ceil(Math.sqrt(WORD_COUNT));
