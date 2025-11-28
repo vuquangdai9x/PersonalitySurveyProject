@@ -9,7 +9,7 @@ let Y_RANDOMNESS = 1.0; // 0 = always center of tile on y, 1 = anywhere to tile 
 // per-word color map loaded from word_colors.txt
 let COLORS_MAP = {};
 // lightness scaling factor 0..1 (multiplies color L component)
-let LIGHTNESS_FACTOR = 1.0;
+let LIGHTNESS_FACTOR = 0.5;
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
@@ -86,9 +86,16 @@ class FloatingWord{
 let words = [];
 
 // expose control elements (added in index.html)
+const panel = document.getElementById('control-panel');
+const panelToggle = document.getElementById('panelToggle');
+const panelBody = document.getElementById('panel-body');
+const ampSlider = document.getElementById('ampSlider');
+const freqSlider = document.getElementById('freqSlider');
 const xSlider = document.getElementById('xSlider');
 const ySlider = document.getElementById('ySlider');
 const lSlider = document.getElementById('lSlider');
+const ampVal = document.getElementById('ampVal');
+const freqVal = document.getElementById('freqVal');
 const xVal = document.getElementById('xVal');
 const yVal = document.getElementById('yVal');
 const lVal = document.getElementById('lVal');
@@ -96,16 +103,30 @@ const applyBtn = document.getElementById('applyBtn');
 
 function bindControls(){
   if(!xSlider) return;
-  xSlider.addEventListener('input', ()=>{ xVal.textContent = Number(xSlider.value).toFixed(2); });
-  ySlider.addEventListener('input', ()=>{ yVal.textContent = Number(ySlider.value).toFixed(2); });
-  lSlider.addEventListener('input', ()=>{ lVal.textContent = Number(lSlider.value).toFixed(2); });
+  // slider live displays
+  ampSlider.addEventListener('input', ()=>{ if(ampVal) ampVal.textContent = ampSlider.value; });
+  freqSlider.addEventListener('input', ()=>{ if(freqVal) freqVal.textContent = Number(freqSlider.value); });
+  xSlider.addEventListener('input', ()=>{ if(xVal) xVal.textContent = Number(xSlider.value).toFixed(2); });
+  ySlider.addEventListener('input', ()=>{ if(yVal) yVal.textContent = Number(ySlider.value).toFixed(2); });
+  lSlider.addEventListener('input', ()=>{ if(lVal) lVal.textContent = Number(lSlider.value).toFixed(2); });
+
   applyBtn.addEventListener('click', ()=>{
+    AMPLITUDE = Number(ampSlider.value);
+    FREQUENCY = Number(freqSlider.value);
     X_RANDOMNESS = Number(xSlider.value);
     Y_RANDOMNESS = Number(ySlider.value);
     LIGHTNESS_FACTOR = Number(lSlider.value);
-    // recompute positions with new randomness
+    // recompute positions with new randomness and measurements
     loadConfigAndWords();
   });
+
+  // panel toggle
+  if(panelToggle && panel){
+    panelToggle.addEventListener('click', ()=>{
+      const isMin = panel.classList.toggle('minimized');
+      panelToggle.setAttribute('aria-expanded', String(!isMin));
+    });
+  }
 }
 bindControls();
 
@@ -122,6 +143,12 @@ async function loadConfigAndWords(){
       if(typeof cfg.yRandomness === 'number') Y_RANDOMNESS = cfg.yRandomness;
       if(typeof cfg.lightness === 'number') LIGHTNESS_FACTOR = cfg.lightness;
       console.log('Loaded config.json', cfg);
+      // apply to UI if present
+      if(typeof ampSlider !== 'undefined' && ampSlider){ ampSlider.value = AMPLITUDE; if(ampVal) ampVal.textContent = AMPLITUDE }
+      if(typeof freqSlider !== 'undefined' && freqSlider){ freqSlider.value = FREQUENCY; if(freqVal) freqVal.textContent = FREQUENCY }
+      if(typeof xSlider !== 'undefined' && xSlider){ xSlider.value = X_RANDOMNESS; if(xVal) xVal.textContent = Number(X_RANDOMNESS).toFixed(2) }
+      if(typeof ySlider !== 'undefined' && ySlider){ ySlider.value = Y_RANDOMNESS; if(yVal) yVal.textContent = Number(Y_RANDOMNESS).toFixed(2) }
+      if(typeof lSlider !== 'undefined' && lSlider){ lSlider.value = LIGHTNESS_FACTOR; if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2) }
     }
   }catch(e){
     console.warn('config.json not loaded, using defaults', e);

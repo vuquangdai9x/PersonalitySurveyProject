@@ -9,13 +9,25 @@
 <body>
   <canvas id="stage"></canvas>
   <div id="control-panel" aria-hidden="false">
-    <label>X randomness: <span id="xVal">1.0</span></label>
-    <input id="xSlider" type="range" min="0" max="20" step="0.1" value="1">
-    <label>Y randomness: <span id="yVal">1.0</span></label>
-    <input id="ySlider" type="range" min="0" max="20" step="0.1" value="1">
-    <label>Lightness: <span id="lVal">1.0</span></label>
-    <input id="lSlider" type="range" min="0" max="1" step="0.01" value="1">
-    <button id="applyBtn">Apply</button>
+    <button id="panelToggle" aria-expanded="true" class="panel-toggle">☰</button>
+    <div id="panel-body">
+      <label>Amplitude: <span id="ampVal">18</span> px</label>
+      <input id="ampSlider" type="range" min="0" max="100" step="1" value="18">
+
+      <label>Frequency: <span id="freqVal">0.0018</span></label>
+      <input id="freqSlider" type="range" min="0.0005" max="0.005" step="0.0001" value="0.0018">
+
+      <label>X randomness: <span id="xVal">1.0</span></label>
+      <input id="xSlider" type="range" min="0" max="20" step="0.1" value="1">
+
+      <label>Y randomness: <span id="yVal">1.0</span></label>
+      <input id="ySlider" type="range" min="0" max="20" step="0.1" value="1">
+
+      <label>Lightness: <span id="lVal">0.50</span></label>
+      <input id="lSlider" type="range" min="0" max="1" step="0.01" value="0.5">
+
+      <button id="applyBtn">Apply</button>
+    </div>
   </div>
 
   <div id="modal" class="hidden" role="dialog" aria-modal="true">

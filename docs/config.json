@@ -2,5 +2,7 @@
   "amplitude": 18,
   "frequency": 0.0018,
   "xRandomness": 1.0,
-  "yRandomness": 1.0
+  "yRandomness": 1.0,
+  "lightness": 0.5,
+  "amplitude": 18
 }
