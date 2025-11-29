@@ -76,11 +76,6 @@ function resize(){
   // Detect mobile device
   isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
     || (window.innerWidth <= 768);
-  
-  // Auto-adjust font size for mobile
-  if(isMobile && FONT_SIZE === 24){
-    FONT_SIZE = MOBILE_FONT_SIZE;
-  }
 }
 window.addEventListener('resize', resize, {passive:true});
 resize();
@@ -352,9 +347,7 @@ async function loadConfigAndWords(){
 
   // tiled positions with configurable randomness
   const margin = 18;
-  const fontSize = FONT_SIZE;
-  const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
-
+  
   // clamp randomness to 0..20 (slider ranges 0..20)
   X_RANDOMNESS = Math.min(20, Math.max(0, Number(X_RANDOMNESS) || 0));
   Y_RANDOMNESS = Math.min(20, Math.max(0, Number(Y_RANDOMNESS) || 0));
@@ -372,6 +365,51 @@ async function loadConfigAndWords(){
   const availableH = Math.max(0, window.innerHeight - margin*2);
   const tileW = availableW / cols;
   const tileH = availableH / rows;
+  
+  // Calculate optimal font size to prevent overlaps
+  // Find the longest word to use for sizing calculation
+  let longestWord = '';
+  let maxLength = 0;
+  for(let i = 0; i < Math.min(WORD_COUNT, source.length); i++){
+    const word = source[i % source.length] || '';
+    if(word.length > maxLength){
+      maxLength = word.length;
+      longestWord = word;
+    }
+  }
+  
+  // Start with a test font size and measure
+  let testFontSize = isMobile ? 20 : 28;
+  let testFont = `${testFontSize}px system-ui,Segoe UI,Roboto,Arial`;
+  ctx.font = testFont;
+  let testWidth = ctx.measureText(longestWord).width;
+  
+  // Calculate font size that fits within tile with some padding
+  // Account for randomness - words can move within their tile
+  const effectiveTileW = tileW * (1 - X_RANDOMNESS * 0.5);
+  const effectiveTileH = tileH * (1 - Y_RANDOMNESS * 0.5);
+  
+  // Scale font size to fit width with 20% padding
+  const targetWidth = effectiveTileW * 0.8;
+  const targetHeight = effectiveTileH * 0.6;
+  
+  let calculatedFontSize = (testFontSize * targetWidth) / testWidth;
+  
+  // Also limit by height (font size should be smaller than tile height)
+  calculatedFontSize = Math.min(calculatedFontSize, targetHeight);
+  
+  // Apply reasonable bounds and account for rated word multipliers
+  const minSize = isMobile ? 10 : 12;
+  const maxSize = isMobile ? 24 : 32;
+  calculatedFontSize = Math.max(minSize, Math.min(maxSize, calculatedFontSize));
+  
+  // Update FONT_SIZE if we're auto-calculating (don't override user config)
+  if(isMobile || FONT_SIZE === 24){
+    FONT_SIZE = Math.floor(calculatedFontSize);
+  }
+  
+  const fontSize = FONT_SIZE;
+  const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
 
   words = [];
   for(let i=0;i<WORD_COUNT;i++){
