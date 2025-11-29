@@ -12,6 +12,8 @@
   "glowFreq": 0.01,
   "glowAmp": 0.05,
   "fontSize": 24,
-  "ratedSizeMultiplier": 2.0,
-  "ratedLightnessBoost": 0.2
+  "ratedSizeMultiplierMin": 1.2,
+  "ratedSizeMultiplierMax": 2.5,
+  "ratedLightnessBoostMin": 0.05,
+  "ratedLightnessBoostMax": 0.3
 }

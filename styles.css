@@ -84,6 +84,8 @@ body.light .modal-actions button{background:#e8edf2;color:#071022}
 #control-panel label{display:block;margin-top:12px;font-weight:500}
 #control-panel label:first-child{margin-top:0}
 #control-panel input[type=number]{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);color:var(--text);font-size:14px;margin-top:4px}
+#control-panel .input-row{display:flex;gap:8px;margin-top:4px}
+#control-panel .float-input-half{width:calc(50% - 4px);padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);color:var(--text);font-size:14px}
 #control-panel input[type=range]{width:100%;margin-top:4px}
 #control-panel button#applyBtn{margin-top:16px;width:100%;padding:10px;border-radius:8px;border:0;background:var(--accent);color:#012;cursor:pointer;font-weight:600;font-size:14px}
 #control-panel button#applyBtn:hover{opacity:0.9}

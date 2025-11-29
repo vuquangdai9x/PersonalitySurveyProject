@@ -22,8 +22,10 @@ let GLOW_FREQ = 0.001; // frequency of lightness oscillation
 let GLOW_AMP = 0.15; // amplitude of lightness change (0-1)
 // font and rated word styling
 let FONT_SIZE = 24; // base font size in pixels
-let RATED_SIZE_MULTIPLIER = 2.0; // size multiplier for rated words
-let RATED_LIGHTNESS_BOOST = 0.2; // additional lightness for rated words
+let RATED_SIZE_MULTIPLIER_MIN = 1.2; // size multiplier for rating=1
+let RATED_SIZE_MULTIPLIER_MAX = 2.5; // size multiplier for rating=5
+let RATED_LIGHTNESS_BOOST_MIN = 0.05; // additional lightness for rating=1
+let RATED_LIGHTNESS_BOOST_MAX = 0.3; // additional lightness for rating=5
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
@@ -134,9 +136,10 @@ const yInput = document.getElementById('yInput');
 const glowFreqInput = document.getElementById('glowFreqInput');
 const glowAmpInput = document.getElementById('glowAmpInput');
 const fontSizeInput = document.getElementById('fontSizeInput');
-const ratedSizeInput = document.getElementById('ratedSizeInput');
-const ratedLightSlider = document.getElementById('ratedLightSlider');
-const ratedLightVal = document.getElementById('ratedLightVal');
+const ratedSizeMinInput = document.getElementById('ratedSizeMinInput');
+const ratedSizeMaxInput = document.getElementById('ratedSizeMaxInput');
+const ratedLightMinInput = document.getElementById('ratedLightMinInput');
+const ratedLightMaxInput = document.getElementById('ratedLightMaxInput');
 const lSlider = document.getElementById('lSlider');
 const lVal = document.getElementById('lVal');
 const applyBtn = document.getElementById('applyBtn');
@@ -150,13 +153,6 @@ function bindControls(){
   if(lSlider && lVal){
     lSlider.addEventListener('input', ()=>{
       lVal.textContent = Number(lSlider.value).toFixed(2);
-    });
-  }
-  
-  // Rated lightness boost slider live display
-  if(ratedLightSlider && ratedLightVal){
-    ratedLightSlider.addEventListener('input', ()=>{
-      ratedLightVal.textContent = Number(ratedLightSlider.value).toFixed(2);
     });
   }
   
@@ -175,8 +171,10 @@ function bindControls(){
       if(glowFreqInput) GLOW_FREQ = Number(glowFreqInput.value);
       if(glowAmpInput) GLOW_AMP = Number(glowAmpInput.value);
       if(fontSizeInput) FONT_SIZE = Number(fontSizeInput.value);
-      if(ratedSizeInput) RATED_SIZE_MULTIPLIER = Number(ratedSizeInput.value);
-      if(ratedLightSlider) RATED_LIGHTNESS_BOOST = Number(ratedLightSlider.value);
+      if(ratedSizeMinInput) RATED_SIZE_MULTIPLIER_MIN = Number(ratedSizeMinInput.value);
+      if(ratedSizeMaxInput) RATED_SIZE_MULTIPLIER_MAX = Number(ratedSizeMaxInput.value);
+      if(ratedLightMinInput) RATED_LIGHTNESS_BOOST_MIN = Number(ratedLightMinInput.value);
+      if(ratedLightMaxInput) RATED_LIGHTNESS_BOOST_MAX = Number(ratedLightMaxInput.value);
       if(lSlider) {
         const isLight = document.body.classList.contains('light');
         if(isLight) {
@@ -249,9 +247,10 @@ async function loadConfig(){
       if(glowFreqInput) glowFreqInput.value = GLOW_FREQ;
       if(glowAmpInput) glowAmpInput.value = GLOW_AMP;
       if(fontSizeInput) fontSizeInput.value = FONT_SIZE;
-      if(ratedSizeInput) ratedSizeInput.value = RATED_SIZE_MULTIPLIER;
-      if(ratedLightSlider) ratedLightSlider.value = RATED_LIGHTNESS_BOOST;
-      if(ratedLightVal) ratedLightVal.textContent = Number(RATED_LIGHTNESS_BOOST).toFixed(2);
+      if(ratedSizeMinInput) ratedSizeMinInput.value = RATED_SIZE_MULTIPLIER_MIN;
+      if(ratedSizeMaxInput) ratedSizeMaxInput.value = RATED_SIZE_MULTIPLIER_MAX;
+      if(ratedLightMinInput) ratedLightMinInput.value = RATED_LIGHTNESS_BOOST_MIN;
+      if(ratedLightMaxInput) ratedLightMaxInput.value = RATED_LIGHTNESS_BOOST_MAX;
       if(lSlider) lSlider.value = LIGHTNESS_FACTOR;
       if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
       if(typeof cfg.darkBgColor === 'string') {
@@ -265,8 +264,10 @@ async function loadConfig(){
       if(typeof cfg.glowFreq === 'number') GLOW_FREQ = cfg.glowFreq;
       if(typeof cfg.glowAmp === 'number') GLOW_AMP = cfg.glowAmp;
       if(typeof cfg.fontSize === 'number') FONT_SIZE = cfg.fontSize;
-      if(typeof cfg.ratedSizeMultiplier === 'number') RATED_SIZE_MULTIPLIER = cfg.ratedSizeMultiplier;
-      if(typeof cfg.ratedLightnessBoost === 'number') RATED_LIGHTNESS_BOOST = cfg.ratedLightnessBoost;
+      if(typeof cfg.ratedSizeMultiplierMin === 'number') RATED_SIZE_MULTIPLIER_MIN = cfg.ratedSizeMultiplierMin;
+      if(typeof cfg.ratedSizeMultiplierMax === 'number') RATED_SIZE_MULTIPLIER_MAX = cfg.ratedSizeMultiplierMax;
+      if(typeof cfg.ratedLightnessBoostMin === 'number') RATED_LIGHTNESS_BOOST_MIN = cfg.ratedLightnessBoostMin;
+      if(typeof cfg.ratedLightnessBoostMax === 'number') RATED_LIGHTNESS_BOOST_MAX = cfg.ratedLightnessBoostMax;
       console.log('Loaded config.json', cfg);
     }
   }catch(e){
@@ -377,8 +378,16 @@ function drawFrame(now){
 
   // draw words, using AMPLITUDE & FREQUENCY loaded from config
   for(const w of words){
-    // Determine font size based on rating
-    const fontSize = w.rating !== null ? baseFontSize * RATED_SIZE_MULTIPLIER : baseFontSize;
+    // Determine font size and lightness boost based on rating (linear interpolation)
+    let sizeMultiplier = 1;
+    let lightnessBoost = 0;
+    if(w.rating !== null){
+      // Map rating 1-5 to min-max range
+      const t = (w.rating - 1) / 4; // normalize to 0-1
+      sizeMultiplier = RATED_SIZE_MULTIPLIER_MIN + t * (RATED_SIZE_MULTIPLIER_MAX - RATED_SIZE_MULTIPLIER_MIN);
+      lightnessBoost = RATED_LIGHTNESS_BOOST_MIN + t * (RATED_LIGHTNESS_BOOST_MAX - RATED_LIGHTNESS_BOOST_MIN);
+    }
+    const fontSize = baseFontSize * sizeMultiplier;
     const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
     
     // calculate glow effect (sine wave modulating lightness)
@@ -386,9 +395,7 @@ function drawFrame(now){
     let effectiveLightness = Math.max(0, Math.min(1, LIGHTNESS_FACTOR + glowOffset));
     
     // Add lightness boost for rated words
-    if(w.rating !== null){
-      effectiveLightness = Math.min(1, effectiveLightness + RATED_LIGHTNESS_BOOST);
-    }
+    effectiveLightness = Math.min(1, effectiveLightness + lightnessBoost);
     
     // determine color for this word (match by lowercased text)
     const key = (w.text || '').toLowerCase();

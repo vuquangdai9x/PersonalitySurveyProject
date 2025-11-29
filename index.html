@@ -50,11 +50,18 @@
       </label>
       
       <label>Rated Size Multiplier:
-        <input id="ratedSizeInput" type="number" step="0.1" value="2.0" class="float-input">
+        <div class="input-row">
+          <input id="ratedSizeMinInput" type="number" step="0.1" value="1.2" class="float-input-half" placeholder="Min">
+          <input id="ratedSizeMaxInput" type="number" step="0.1" value="2.5" class="float-input-half" placeholder="Max">
+        </div>
       </label>
       
-      <label>Rated Lightness Boost: <span id="ratedLightVal">0.20</span></label>
-      <input id="ratedLightSlider" type="range" min="0" max="0.5" step="0.01" value="0.2">
+      <label>Rated Lightness Boost:
+        <div class="input-row">
+          <input id="ratedLightMinInput" type="number" step="0.01" value="0.05" class="float-input-half" placeholder="Min">
+          <input id="ratedLightMaxInput" type="number" step="0.01" value="0.3" class="float-input-half" placeholder="Max">
+        </div>
+      </label>
       
       <label>Lightness: <span id="lVal">0.50</span></label>
       <input id="lSlider" type="range" min="0" max="1" step="0.01" value="0.5">
