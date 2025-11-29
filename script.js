@@ -37,8 +37,8 @@ let camera = {
 // Mobile detection and configuration
 let isMobile = false;
 let MOBILE_FONT_SIZE = 18;
-let MOBILE_COLS = 5;
-let MOBILE_ROWS = 20;
+let MOBILE_COLS = 4;
+let MOBILE_ROWS = 25;
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
