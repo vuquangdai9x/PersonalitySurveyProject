@@ -27,6 +27,19 @@ let RATED_SIZE_MULTIPLIER_MAX = 2.5; // size multiplier for rating=5
 let RATED_LIGHTNESS_BOOST_MIN = 0.05; // additional lightness for rating=1
 let RATED_LIGHTNESS_BOOST_MAX = 0.3; // additional lightness for rating=5
 
+// Camera transform for zoom and pan
+let camera = {
+  x: 0,
+  y: 0,
+  zoom: 1
+};
+
+// Mobile detection and configuration
+let isMobile = false;
+let MOBILE_FONT_SIZE = 18;
+let MOBILE_COLS = 5;
+let MOBILE_ROWS = 20;
+
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
   "part","child","eye","woman","place","work","week","case","point","government",
@@ -59,6 +72,15 @@ function resize(){
   canvas.style.width = window.innerWidth + 'px';
   canvas.style.height = window.innerHeight + 'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
+  
+  // Detect mobile device
+  isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+    || (window.innerWidth <= 768);
+  
+  // Auto-adjust font size for mobile
+  if(isMobile && FONT_SIZE === 24){
+    FONT_SIZE = MOBILE_FONT_SIZE;
+  }
 }
 window.addEventListener('resize', resize, {passive:true});
 resize();
@@ -93,7 +115,7 @@ class FloatingWord{
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(this.text, x, y);
-    // store bounding box (top-left) and current position
+    // store bounding box (top-left) and current position (in world coordinates)
     this.lastX = x - (this.width / 2);
     this.lastY = y - (this.height / 2);
     this.currentX = x;
@@ -275,6 +297,7 @@ async function loadConfig(){
   }catch(e){
     console.warn('config.json not loaded, using defaults', e);
   }
+  loadConfigAndWords();
 }
 
 async function loadConfigAndWords(){
@@ -336,9 +359,15 @@ async function loadConfigAndWords(){
   X_RANDOMNESS = Math.min(20, Math.max(0, Number(X_RANDOMNESS) || 0));
   Y_RANDOMNESS = Math.min(20, Math.max(0, Number(Y_RANDOMNESS) || 0));
 
-  // determine grid size
-  const cols = Math.ceil(Math.sqrt(WORD_COUNT));
-  const rows = Math.ceil(WORD_COUNT / cols);
+  // determine grid size (use mobile-specific layout if on mobile)
+  let cols, rows;
+  if(isMobile){
+    cols = MOBILE_COLS;
+    rows = MOBILE_ROWS;
+  } else {
+    cols = Math.ceil(Math.sqrt(WORD_COUNT));
+    rows = Math.ceil(WORD_COUNT / cols);
+  }
   const availableW = Math.max(0, window.innerWidth - margin*2);
   const availableH = Math.max(0, window.innerHeight - margin*2);
   const tileW = availableW / cols;
@@ -375,6 +404,11 @@ let start = performance.now();
 function drawFrame(now){
   const t = now - start;
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  
+  // Apply camera transform
+  ctx.save();
+  ctx.translate(camera.x, camera.y);
+  ctx.scale(camera.zoom, camera.zoom);
 
   const baseFontSize = FONT_SIZE;
 
@@ -428,6 +462,8 @@ function drawFrame(now){
     }
     w.draw(now, font, colorStr, fontSize);
   }
+  
+  ctx.restore();
 
   requestAnimationFrame(drawFrame);
 }
@@ -435,9 +471,10 @@ function drawFrame(now){
 // Mouse cursor handling for hover
 canvas.addEventListener('mousemove', (ev)=>{
   const pos = getCanvasPos(ev);
+  const worldPos = screenToWorld(pos.x, pos.y);
   let isHovering = false;
   for(let i=words.length-1;i>=0;i--){
-    if(words[i].contains(pos.x, pos.y)){
+    if(words[i].contains(worldPos.x, worldPos.y)){
       isHovering = true;
       break;
     }
@@ -463,6 +500,14 @@ function getCanvasPos(evt){
   const x = (clientX - rect.left);
   const y = (clientY - rect.top);
   return {x, y};
+}
+
+// Transform screen coordinates to world coordinates (accounting for camera)
+function screenToWorld(screenX, screenY){
+  return {
+    x: (screenX - camera.x) / camera.zoom,
+    y: (screenY - camera.y) / camera.zoom
+  };
 }
 
 function openModalFor(word){
@@ -501,25 +546,14 @@ function submitRatingValue(value){
 
 canvas.addEventListener('click', (ev)=>{
   const pos = getCanvasPos(ev);
+  const worldPos = screenToWorld(pos.x, pos.y);
   for(let i=words.length-1;i>=0;i--){
-    if(words[i].contains(pos.x, pos.y)){
+    if(words[i].contains(worldPos.x, worldPos.y)){
       openModalFor(words[i]);
       break;
     }
   }
 });
-
-// touch support
-canvas.addEventListener('touchstart', (ev)=>{
-  const pos = getCanvasPos(ev);
-  for(let i=words.length-1;i>=0;i--){
-    if(words[i].contains(pos.x, pos.y)){
-      openModalFor(words[i]);
-      ev.preventDefault();
-      break;
-    }
-  }
-}, {passive:false});
 
 cancelBtn.addEventListener('click', ()=>{
   // hide modal and clear any temporary selection
@@ -574,3 +608,181 @@ if(ratingRadios){
 
 // handle orientation/size change re-init measurements
 window.addEventListener('orientationchange', ()=>{ resize(); loadConfigAndWords(); });
+
+// ===== PAN AND ZOOM FUNCTIONALITY =====
+
+// Mouse wheel zoom
+canvas.addEventListener('wheel', (ev)=>{
+  ev.preventDefault();
+  const pos = getCanvasPos(ev);
+  const worldPosBefore = screenToWorld(pos.x, pos.y);
+  
+  const zoomFactor = ev.deltaY > 0 ? 0.9 : 1.1;
+  camera.zoom = Math.max(0.1, Math.min(5, camera.zoom * zoomFactor));
+  
+  // Adjust camera position to zoom toward mouse position
+  const worldPosAfter = screenToWorld(pos.x, pos.y);
+  camera.x += (worldPosAfter.x - worldPosBefore.x) * camera.zoom;
+  camera.y += (worldPosAfter.y - worldPosBefore.y) * camera.zoom;
+}, {passive: false});
+
+// Mouse pan
+let isPanning = false;
+let panStart = {x: 0, y: 0};
+
+canvas.addEventListener('mousedown', (ev)=>{
+  // Right click or middle click to pan
+  if(ev.button === 2 || ev.button === 1){
+    ev.preventDefault();
+    isPanning = true;
+    panStart = {x: ev.clientX, y: ev.clientY};
+    canvas.style.cursor = 'grabbing';
+  }
+});
+
+canvas.addEventListener('mousemove', (ev)=>{
+  if(isPanning){
+    const dx = ev.clientX - panStart.x;
+    const dy = ev.clientY - panStart.y;
+    camera.x += dx;
+    camera.y += dy;
+    panStart = {x: ev.clientX, y: ev.clientY};
+  }
+});
+
+canvas.addEventListener('mouseup', (ev)=>{
+  if(isPanning){
+    isPanning = false;
+    canvas.style.cursor = 'default';
+  }
+});
+
+canvas.addEventListener('mouseleave', ()=>{
+  if(isPanning){
+    isPanning = false;
+    canvas.style.cursor = 'default';
+  }
+});
+
+// Prevent context menu on right-click
+canvas.addEventListener('contextmenu', (ev)=>{
+  ev.preventDefault();
+});
+
+// Touch gestures for pan and zoom
+let touchState = {
+  touching: false,
+  lastTouches: [],
+  initialDistance: 0
+};
+
+canvas.addEventListener('touchstart', (ev)=>{
+  if(ev.touches.length === 1){
+    // Single touch - could be tap or pan
+    touchState.touching = true;
+    touchState.lastTouches = Array.from(ev.touches).map(t => ({x: t.clientX, y: t.clientY}));
+    touchState.startTime = Date.now();
+    touchState.startPos = {x: ev.touches[0].clientX, y: ev.touches[0].clientY};
+  } else if(ev.touches.length === 2){
+    // Two-finger gesture - zoom/pan
+    ev.preventDefault();
+    touchState.touching = true;
+    touchState.lastTouches = Array.from(ev.touches).map(t => ({x: t.clientX, y: t.clientY}));
+    const dx = ev.touches[1].clientX - ev.touches[0].clientX;
+    const dy = ev.touches[1].clientY - ev.touches[0].clientY;
+    touchState.initialDistance = Math.sqrt(dx*dx + dy*dy);
+  }
+}, {passive: false});
+
+canvas.addEventListener('touchmove', (ev)=>{
+  if(!touchState.touching) return;
+  
+  if(ev.touches.length === 1 && touchState.lastTouches.length === 1){
+    // Single finger pan - check if moved enough to be a pan
+    const moveDistance = Math.sqrt(
+      Math.pow(ev.touches[0].clientX - touchState.startPos.x, 2) +
+      Math.pow(ev.touches[0].clientY - touchState.startPos.y, 2)
+    );
+    
+    if(moveDistance > 10){
+      // It's a pan
+      ev.preventDefault();
+      const dx = ev.touches[0].clientX - touchState.lastTouches[0].x;
+      const dy = ev.touches[0].clientY - touchState.lastTouches[0].y;
+      camera.x += dx;
+      camera.y += dy;
+      touchState.lastTouches = [{x: ev.touches[0].clientX, y: ev.touches[0].clientY}];
+    }
+  } else if(ev.touches.length === 2 && touchState.lastTouches.length === 2){
+    // Two-finger pinch zoom and pan
+    ev.preventDefault();
+    
+    // Calculate center point
+    const centerX = (ev.touches[0].clientX + ev.touches[1].clientX) / 2;
+    const centerY = (ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+    const lastCenterX = (touchState.lastTouches[0].x + touchState.lastTouches[1].x) / 2;
+    const lastCenterY = (touchState.lastTouches[0].y + touchState.lastTouches[1].y) / 2;
+    
+    // Pan based on center movement
+    const dx = centerX - lastCenterX;
+    const dy = centerY - lastCenterY;
+    camera.x += dx;
+    camera.y += dy;
+    
+    // Zoom based on distance change
+    const dx2 = ev.touches[1].clientX - ev.touches[0].clientX;
+    const dy2 = ev.touches[1].clientY - ev.touches[0].clientY;
+    const distance = Math.sqrt(dx2*dx2 + dy2*dy2);
+    
+    if(touchState.initialDistance > 0){
+      const rect = canvas.getBoundingClientRect();
+      const canvasX = centerX - rect.left;
+      const canvasY = centerY - rect.top;
+      const worldPosBefore = screenToWorld(canvasX, canvasY);
+      
+      const zoomFactor = distance / touchState.initialDistance;
+      camera.zoom = Math.max(0.1, Math.min(5, camera.zoom * zoomFactor));
+      
+      const worldPosAfter = screenToWorld(canvasX, canvasY);
+      camera.x += (worldPosAfter.x - worldPosBefore.x) * camera.zoom;
+      camera.y += (worldPosAfter.y - worldPosBefore.y) * camera.zoom;
+    }
+    
+    touchState.initialDistance = distance;
+    touchState.lastTouches = Array.from(ev.touches).map(t => ({x: t.clientX, y: t.clientY}));
+  }
+}, {passive: false});
+
+canvas.addEventListener('touchend', (ev)=>{
+  if(ev.touches.length === 0){
+    // Check if it was a quick tap (not a pan)
+    if(touchState.startTime && (Date.now() - touchState.startTime) < 300){
+      const moveDistance = Math.sqrt(
+        Math.pow(touchState.lastTouches[0].x - touchState.startPos.x, 2) +
+        Math.pow(touchState.lastTouches[0].y - touchState.startPos.y, 2)
+      );
+      
+      if(moveDistance < 10){
+        // It's a tap - check for word click
+        const rect = canvas.getBoundingClientRect();
+        const canvasX = touchState.startPos.x - rect.left;
+        const canvasY = touchState.startPos.y - rect.top;
+        const worldPos = screenToWorld(canvasX, canvasY);
+        
+        for(let i=words.length-1;i>=0;i--){
+          if(words[i].contains(worldPos.x, worldPos.y)){
+            openModalFor(words[i]);
+            break;
+          }
+        }
+      }
+    }
+    
+    touchState.touching = false;
+    touchState.lastTouches = [];
+  } else if(ev.touches.length === 1){
+    // One finger lifted, reset for potential single-touch pan
+    touchState.lastTouches = [{x: ev.touches[0].clientX, y: ev.touches[0].clientY}];
+    touchState.initialDistance = 0;
+  }
+}, {passive: false});
