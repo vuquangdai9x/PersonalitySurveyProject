@@ -59,7 +59,7 @@ body{transition:background 240ms ease,color 240ms ease}
   position:fixed;top:16px;right:16px;width:44px;height:44px;
   background:rgba(255,255,255,0.09);backdrop-filter:blur(8px);
   border:0;border-radius:8px;color:var(--text);font-size:20px;
-  cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:60;
+  cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:59;
   display:flex;align-items:center;justify-content:center;
   transition:transform 150ms ease,box-shadow 150ms ease
 }
@@ -67,6 +67,25 @@ body{transition:background 240ms ease,color 240ms ease}
   transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.5)
 }
 #themeToggle:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+
+/* Control panel */
+#control-panel{
+  position:fixed;top:70px;right:16px;background:rgba(255,255,255,0.09);backdrop-filter:blur(8px);
+  color:var(--text);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.5);z-index:60;width:220px;font-size:13px;
+  transition:all 200ms ease
+}
+#control-panel label{display:block;margin-top:12px;font-weight:500}
+#control-panel label:first-child{margin-top:0}
+#control-panel input[type=number]{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);color:var(--text);font-size:14px;margin-top:4px}
+#control-panel input[type=range]{width:100%;margin-top:4px}
+#control-panel button#applyBtn{margin-top:16px;width:100%;padding:10px;border-radius:8px;border:0;background:var(--accent);color:#012;cursor:pointer;font-weight:600;font-size:14px}
+#control-panel button#applyBtn:hover{opacity:0.9}
+
+/* Panel toggle */
+.panel-toggle{position:absolute;left:10px;top:10px;background:transparent;border:0;color:var(--text);font-size:18px;cursor:pointer;padding:4px}
+#control-panel.minimized{width:44px;height:44px;padding:8px}
+#control-panel.minimized #panel-body{display:none}
+#control-panel.minimized .panel-toggle{left:8px;top:8px}
 
 
 /* Survey-style modal layout */

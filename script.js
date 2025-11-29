@@ -91,16 +91,75 @@ class FloatingWord{
 
 let words = [];
 
+// Control panel elements
+const panel = document.getElementById('control-panel');
+const panelToggle = document.getElementById('panelToggle');
+const panelBody = document.getElementById('panel-body');
+const ampInput = document.getElementById('ampInput');
+const freqInput = document.getElementById('freqInput');
+const xInput = document.getElementById('xInput');
+const yInput = document.getElementById('yInput');
+const lSlider = document.getElementById('lSlider');
+const lVal = document.getElementById('lVal');
+const applyBtn = document.getElementById('applyBtn');
+
 // Theme toggle button
 const themeToggleBtn = document.getElementById('themeToggle');
+
+// Bind control panel handlers
+function bindControls(){
+  // Lightness slider live display
+  if(lSlider && lVal){
+    lSlider.addEventListener('input', ()=>{
+      lVal.textContent = Number(lSlider.value).toFixed(2);
+    });
+  }
+  
+  // Apply button
+  if(applyBtn){
+    applyBtn.addEventListener('click', ()=>{
+      if(ampInput) AMPLITUDE = Number(ampInput.value) || AMPLITUDE;
+      if(freqInput) FREQUENCY = Number(freqInput.value) || FREQUENCY;
+      if(xInput) X_RANDOMNESS = Number(xInput.value) || X_RANDOMNESS;
+      if(yInput) Y_RANDOMNESS = Number(yInput.value) || Y_RANDOMNESS;
+      if(lSlider) {
+        const isLight = document.body.classList.contains('light');
+        if(isLight) {
+          LIGHTNESS_LIGHT = Number(lSlider.value);
+          LIGHTNESS_FACTOR = LIGHTNESS_LIGHT;
+        } else {
+          LIGHTNESS_DARK = Number(lSlider.value);
+          LIGHTNESS_FACTOR = LIGHTNESS_DARK;
+        }
+      }
+      // Recompute positions with new settings
+      loadConfigAndWords();
+    });
+  }
+  
+  // Panel toggle
+  if(panelToggle && panel){
+    panelToggle.addEventListener('click', ()=>{
+      const isMin = panel.classList.toggle('minimized');
+      panelToggle.setAttribute('aria-expanded', String(!isMin));
+    });
+  }
+}
+
+// Theme toggle handler
 // Theme toggle handler
 if(themeToggleBtn){
   themeToggleBtn.addEventListener('click', ()=>{
     const isLight = document.body.classList.toggle('light');
     // switch between lightnessDark and lightnessLight
     LIGHTNESS_FACTOR = isLight ? LIGHTNESS_LIGHT : LIGHTNESS_DARK;
+    // Update slider to show current lightness
+    if(lSlider) lSlider.value = LIGHTNESS_FACTOR;
+    if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
   });
 }
+
+bindControls();
 
 
 async function loadConfigAndWords(){
@@ -118,6 +177,13 @@ async function loadConfigAndWords(){
       // Set initial lightness based on current theme
       const isLight = document.body.classList.contains('light');
       LIGHTNESS_FACTOR = isLight ? LIGHTNESS_LIGHT : LIGHTNESS_DARK;
+      // Sync UI controls
+      if(ampInput) ampInput.value = AMPLITUDE;
+      if(freqInput) freqInput.value = FREQUENCY;
+      if(xInput) xInput.value = X_RANDOMNESS;
+      if(yInput) yInput.value = Y_RANDOMNESS;
+      if(lSlider) lSlider.value = LIGHTNESS_FACTOR;
+      if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
       if(typeof cfg.darkBgColor === 'string') {
         DARK_BG_COLOR = cfg.darkBgColor;
         document.documentElement.style.setProperty('--bg-dark', DARK_BG_COLOR);
