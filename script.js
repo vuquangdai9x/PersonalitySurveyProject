@@ -10,6 +10,8 @@ let Y_RANDOMNESS = 1.0; // 0 = always center of tile on y, 1 = anywhere to tile 
 let COLORS_MAP = {};
 // lightness scaling factor 0..1 (multiplies color L component)
 let LIGHTNESS_FACTOR = 0.5;
+let LIGHTNESS_DARK = 0.8;
+let LIGHTNESS_LIGHT = 0.2;
 // configurable background colors
 let DARK_BG_COLOR = '#0f1724';
 let LIGHT_BG_COLOR = '#f7fafc';
@@ -95,8 +97,8 @@ const themeToggleBtn = document.getElementById('themeToggle');
 if(themeToggleBtn){
   themeToggleBtn.addEventListener('click', ()=>{
     const isLight = document.body.classList.toggle('light');
-    // invert lightness factor for theme change
-    LIGHTNESS_FACTOR = 1 - Number(LIGHTNESS_FACTOR);
+    // switch between lightnessDark and lightnessLight
+    LIGHTNESS_FACTOR = isLight ? LIGHTNESS_LIGHT : LIGHTNESS_DARK;
   });
 }
 
@@ -111,7 +113,11 @@ async function loadConfigAndWords(){
       if(typeof cfg.frequency === 'number') FREQUENCY = cfg.frequency;
       if(typeof cfg.xRandomness === 'number') X_RANDOMNESS = cfg.xRandomness;
       if(typeof cfg.yRandomness === 'number') Y_RANDOMNESS = cfg.yRandomness;
-      if(typeof cfg.lightness === 'number') LIGHTNESS_FACTOR = cfg.lightness;
+      if(typeof cfg.lightnessDark === 'number') LIGHTNESS_DARK = cfg.lightnessDark;
+      if(typeof cfg.lightnessLight === 'number') LIGHTNESS_LIGHT = cfg.lightnessLight;
+      // Set initial lightness based on current theme
+      const isLight = document.body.classList.contains('light');
+      LIGHTNESS_FACTOR = isLight ? LIGHTNESS_LIGHT : LIGHTNESS_DARK;
       if(typeof cfg.darkBgColor === 'string') {
         DARK_BG_COLOR = cfg.darkBgColor;
         document.documentElement.style.setProperty('--bg-dark', DARK_BG_COLOR);

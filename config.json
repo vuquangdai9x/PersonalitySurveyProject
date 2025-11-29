@@ -2,7 +2,8 @@
   "frequency": 0.0018,
   "xRandomness": 1.0,
   "yRandomness": 1.0,
-  "lightness": 0.5,
+  "lightnessDark": 0.8,
+  "lightnessLight": 0.2,
   "amplitude": 18,
   "darkBgColor": "#0f1724",
   "lightBgColor": "#f7fafc"

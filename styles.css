@@ -74,7 +74,7 @@ body{transition:background 240ms ease,color 240ms ease}
 .survey-modal form{display:flex;flex-direction:column;gap:20px}
 .survey-question{color:var(--text);font-size:30px;text-align:center;padding:10px 12px}
 .rating-row{display:flex;align-items:center;gap:12px}
-.rating-side{width:160px;font-size:20px;color:rgba(230,238,248,0.95);text-align:center}
+.rating-side{width:160px;font-size:20px;color:var(--text);text-align:center}
 .rating-center{flex:1;display:flex;flex-direction:column;align-items:center}
 .rating-numbers{display:none}
 .rating-numbers span{width:20%;text-align:center}

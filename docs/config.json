@@ -1,8 +1,8 @@
 {
-  "amplitude": 18,
-  "frequency": 0.0018,
-  "xRandomness": 1.0,
-  "yRandomness": 1.0,
-  "lightness": 0.5,
-  "amplitude": 18
+  "amplitude": 5,
+  "frequency": 0.001,
+  "xRandomness": 0.1,
+  "yRandomness": 0.1,
+  "lightnessDark": 0.8,
+  "lightnessLight": 0.2
 }
