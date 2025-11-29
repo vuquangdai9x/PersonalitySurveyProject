@@ -161,9 +161,8 @@ if(themeToggleBtn){
 
 bindControls();
 
-
-async function loadConfigAndWords(){
-  // Try to load config.json to override amplitude and frequency
+// Load config once at startup
+async function loadConfig(){
   try{
     const cfgResp = await fetch('config.json');
     if(cfgResp.ok){
@@ -197,6 +196,10 @@ async function loadConfigAndWords(){
   }catch(e){
     console.warn('config.json not loaded, using defaults', e);
   }
+}
+
+async function loadConfigAndWords(){
+  // Don't reload config, just use current UI/variable values
 
   // Try to load vietnamese words list (comma-separated)
   let sourceWords = null;
@@ -337,8 +340,10 @@ function drawFrame(now){
   requestAnimationFrame(drawFrame);
 }
 
-// load before starting animation
-loadConfigAndWords().then(()=>{
+// Load config, then load words and start animation
+loadConfig().then(()=>{
+  return loadConfigAndWords();
+}).then(()=>{
   requestAnimationFrame(drawFrame);
 }).catch((e)=>{
   console.error('Failed to load config/words', e);
