@@ -15,6 +15,9 @@ let LIGHTNESS_LIGHT = 0.2;
 // configurable background colors
 let DARK_BG_COLOR = '#0f1724';
 let LIGHT_BG_COLOR = '#f7fafc';
+// glow effect settings
+let GLOW_FREQ = 0.001; // frequency of lightness oscillation
+let GLOW_AMP = 0.15; // amplitude of lightness change (0-1)
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
@@ -58,6 +61,7 @@ class FloatingWord{
     this.baseX = x;
     this.baseY = y;
     this.phase = phase;
+    this.glowPhase = Math.random() * Math.PI * 2; // random glow offset
     this.width = 0; this.height = 0;
   }
   measure(font){
@@ -191,6 +195,8 @@ async function loadConfig(){
         LIGHT_BG_COLOR = cfg.lightBgColor;
         document.documentElement.style.setProperty('--bg-light', LIGHT_BG_COLOR);
       }
+      if(typeof cfg.glowFreq === 'number') GLOW_FREQ = cfg.glowFreq;
+      if(typeof cfg.glowAmp === 'number') GLOW_AMP = cfg.glowAmp;
       console.log('Loaded config.json', cfg);
     }
   }catch(e){
@@ -301,13 +307,17 @@ function drawFrame(now){
 
   // draw words, using AMPLITUDE & FREQUENCY loaded from config
   for(const w of words){
+    // calculate glow effect (sine wave modulating lightness)
+    const glowOffset = Math.sin(GLOW_FREQ * now + w.glowPhase) * GLOW_AMP;
+    const effectiveLightness = Math.max(0, Math.min(1, LIGHTNESS_FACTOR + glowOffset));
+    
     // determine color for this word (match by lowercased text)
     const key = (w.text || '').toLowerCase();
     let colorStr = '#e6eef8';
     const entry = COLORS_MAP[key];
     if(entry){
       if(entry.h !== undefined){
-        const s = Number(LIGHTNESS_FACTOR);
+        const s = Number(effectiveLightness);
         let L;
         if (s === 0.5 || isNaN(s)) {
           L = entry.l;
@@ -322,7 +332,7 @@ function drawFrame(now){
         colorStr = `hsl(${entry.h},${entry.s}%,${L}%)`;
       } else if(entry.raw){
         // for non-HSL raw values: if lightness is extreme use black/white, if 0.5 keep original
-        const s = Number(LIGHTNESS_FACTOR);
+        const s = Number(effectiveLightness);
         if (s === 1) colorStr = '#ffffff';
         else if (s === 0) colorStr = '#000000';
         else colorStr = entry.raw;
