@@ -1,8 +1,10 @@
 ﻿// Floating words canvas with modal rating
 const WORD_COUNT = 100;
 // defaults (may be overridden by config.json)
-let AMPLITUDE = 18; // px
-let FREQUENCY = 0.0018; // radians/ms, same for all words
+let AMPLITUDE_X = 18; // px horizontal movement
+let AMPLITUDE_Y = 18; // px vertical movement
+let FREQUENCY_X = 0.0018; // radians/ms for X axis
+let FREQUENCY_Y = 0.0018; // radians/ms for Y axis
 // randomness 0..1 controlling how far from the tile center a word may appear
 let X_RANDOMNESS = 1.0; // 0 = always center of tile on x, 1 = anywhere to tile boundary
 let Y_RANDOMNESS = 1.0; // 0 = always center of tile on y, 1 = anywhere to tile boundary
@@ -56,11 +58,12 @@ window.addEventListener('resize', resize, {passive:true});
 resize();
 
 class FloatingWord{
-  constructor(text,x,y,phase){
+  constructor(text,x,y,phaseX,phaseY){
     this.text = text;
     this.baseX = x;
     this.baseY = y;
-    this.phase = phase;
+    this.phaseX = phaseX;
+    this.phaseY = phaseY;
     this.glowPhase = Math.random() * Math.PI * 2; // random glow offset
     this.width = 0; this.height = 0;
   }
@@ -74,16 +77,17 @@ class FloatingWord{
   }
   draw(time, font, color){
     ctx.font = font;
-    const y = this.baseY + AMPLITUDE * Math.sin(FREQUENCY * time + this.phase);
+    const x = this.baseX + AMPLITUDE_X * Math.sin(FREQUENCY_X * time + this.phaseX);
+    const y = this.baseY + AMPLITUDE_Y * Math.sin(FREQUENCY_Y * time + this.phaseY);
     ctx.fillStyle = color;
-    // center text on (baseX, y)
+    // center text on (x, y)
     const prevAlign = ctx.textAlign;
     const prevBaseline = ctx.textBaseline;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(this.text, this.baseX, y);
+    ctx.fillText(this.text, x, y);
     // store bounding box (top-left)
-    this.lastX = this.baseX - (this.width / 2);
+    this.lastX = x - (this.width / 2);
     this.lastY = y - (this.height / 2);
     ctx.textAlign = prevAlign;
     ctx.textBaseline = prevBaseline;
@@ -99,8 +103,10 @@ let words = [];
 const panel = document.getElementById('control-panel');
 const panelToggle = document.getElementById('panelToggle');
 const panelBody = document.getElementById('panel-body');
-const ampInput = document.getElementById('ampInput');
-const freqInput = document.getElementById('freqInput');
+const ampXInput = document.getElementById('ampXInput');
+const ampYInput = document.getElementById('ampYInput');
+const freqXInput = document.getElementById('freqXInput');
+const freqYInput = document.getElementById('freqYInput');
 const xInput = document.getElementById('xInput');
 const yInput = document.getElementById('yInput');
 const glowFreqInput = document.getElementById('glowFreqInput');
@@ -124,8 +130,10 @@ function bindControls(){
   // Apply button
   if(applyBtn){
     applyBtn.addEventListener('click', ()=>{
-      if(ampInput) AMPLITUDE = Number(ampInput.value);
-      if(freqInput) FREQUENCY = Number(freqInput.value);
+      if(ampXInput) AMPLITUDE_X = Number(ampXInput.value);
+      if(ampYInput) AMPLITUDE_Y = Number(ampYInput.value);
+      if(freqXInput) FREQUENCY_X = Number(freqXInput.value);
+      if(freqYInput) FREQUENCY_Y = Number(freqYInput.value);
       if(xInput) X_RANDOMNESS = Number(xInput.value);
       if(yInput) Y_RANDOMNESS = Number(yInput.value);
       if(glowFreqInput) GLOW_FREQ = Number(glowFreqInput.value);
@@ -175,8 +183,10 @@ async function loadConfig(){
     const cfgResp = await fetch('config.json');
     if(cfgResp.ok){
       const cfg = await cfgResp.json();
-      if(typeof cfg.amplitude === 'number') AMPLITUDE = cfg.amplitude;
-      if(typeof cfg.frequency === 'number') FREQUENCY = cfg.frequency;
+      if(typeof cfg.amplitudeX === 'number') AMPLITUDE_X = cfg.amplitudeX;
+      if(typeof cfg.amplitudeY === 'number') AMPLITUDE_Y = cfg.amplitudeY;
+      if(typeof cfg.frequencyX === 'number') FREQUENCY_X = cfg.frequencyX;
+      if(typeof cfg.frequencyY === 'number') FREQUENCY_Y = cfg.frequencyY;
       if(typeof cfg.xRandomness === 'number') X_RANDOMNESS = cfg.xRandomness;
       if(typeof cfg.yRandomness === 'number') Y_RANDOMNESS = cfg.yRandomness;
       if(typeof cfg.lightnessDark === 'number') LIGHTNESS_DARK = cfg.lightnessDark;
@@ -185,8 +195,10 @@ async function loadConfig(){
       const isLight = document.body.classList.contains('light');
       LIGHTNESS_FACTOR = isLight ? LIGHTNESS_LIGHT : LIGHTNESS_DARK;
       // Sync UI controls
-      if(ampInput) ampInput.value = AMPLITUDE;
-      if(freqInput) freqInput.value = FREQUENCY;
+      if(ampXInput) ampXInput.value = AMPLITUDE_X;
+      if(ampYInput) ampYInput.value = AMPLITUDE_Y;
+      if(freqXInput) freqXInput.value = FREQUENCY_X;
+      if(freqYInput) freqYInput.value = FREQUENCY_Y;
       if(xInput) xInput.value = X_RANDOMNESS;
       if(yInput) yInput.value = Y_RANDOMNESS;
       if(glowFreqInput) glowFreqInput.value = GLOW_FREQ;
@@ -295,8 +307,9 @@ async function loadConfigAndWords(){
     const x = Math.min(Math.max(centerX + dx, margin + 4), window.innerWidth - margin - 4);
     const y = Math.min(Math.max(centerY + dy, margin + 14), window.innerHeight - margin - 4);
 
-    const phase = Math.random() * Math.PI * 2;
-    const w = new FloatingWord(text, x, y, phase);
+    const phaseX = Math.random() * Math.PI * 2;
+    const phaseY = Math.random() * Math.PI * 2;
+    const w = new FloatingWord(text, x, y, phaseX, phaseY);
     w.measure(font);
     words.push(w);
   }
