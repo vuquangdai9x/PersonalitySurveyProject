@@ -1,8 +1,14 @@
 {
-  "amplitude": 3,
-  "frequency": 0.004,
+  "amplitudeX": 3,
+  "amplitudeY": 3,
+  "frequencyX": 0.003,
+  "frequencyY": 0.003,
   "xRandomness": 0.25,
   "yRandomness": 0.25,
   "lightnessDark": 0.8,
-  "lightnessLight": 0.2
+  "lightnessLight": 0.2,
+  "darkBgColor": "#0f1724",
+  "lightBgColor": "#f7fafc",
+  "glowFreq": 0.01,
+  "glowAmp": 0.05
 }

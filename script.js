@@ -66,6 +66,7 @@ class FloatingWord{
     this.phaseY = phaseY;
     this.glowPhase = Math.random() * Math.PI * 2; // random glow offset
     this.width = 0; this.height = 0;
+    this.rating = null; // store rating after submission
   }
   measure(font){
     ctx.font = font;
@@ -86,9 +87,26 @@ class FloatingWord{
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(this.text, x, y);
-    // store bounding box (top-left)
+    // store bounding box (top-left) and current position
     this.lastX = x - (this.width / 2);
     this.lastY = y - (this.height / 2);
+    this.currentX = x;
+    this.currentY = y;
+    
+    // Draw rating circles if rated
+    if(this.rating !== null && this.rating > 0){
+      const circleRadius = 3;
+      const circleSpacing = 8;
+      const startX = x - (this.width / 2);
+      const circleY = y + (this.height / 2) + 8;
+      ctx.fillStyle = color;
+      for(let i = 0; i < this.rating; i++){
+        ctx.beginPath();
+        ctx.arc(startX + i * circleSpacing, circleY, circleRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
     ctx.textAlign = prevAlign;
     ctx.textBaseline = prevBaseline;
   }
@@ -363,6 +381,19 @@ function drawFrame(now){
   requestAnimationFrame(drawFrame);
 }
 
+// Mouse cursor handling for hover
+canvas.addEventListener('mousemove', (ev)=>{
+  const pos = getCanvasPos(ev);
+  let isHovering = false;
+  for(let i=words.length-1;i>=0;i--){
+    if(words[i].contains(pos.x, pos.y)){
+      isHovering = true;
+      break;
+    }
+  }
+  canvas.style.cursor = isHovering ? 'pointer' : 'default';
+});
+
 // Load config, then load words and start animation
 loadConfig().then(()=>{
   return loadConfigAndWords();
@@ -403,6 +434,9 @@ function submitRatingValue(value){
   const rating = Number(value);
   const word = ratingForm.dataset.word || '';
   ratings.push({word, rating: Number(rating), ts: Date.now()});
+  // Find the word object and store the rating
+  const wordObj = words.find(w => w.text === word);
+  if(wordObj) wordObj.rating = rating;
   console.log('rating saved', ratings[ratings.length-1]);
   modal.classList.add('hidden');
   // clear selection after submit to reset UI for next time
