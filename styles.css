@@ -34,9 +34,15 @@ body{transition:background 240ms ease,color 240ms ease}
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   background:rgba(2,6,23,0.72);padding:16px;z-index:40
 }
+body.light #modal{
+  background:rgba(240,244,248,0.85);
+}
 .modal-inner{
   background:var(--card);border-radius:12px;padding:18px;min-width:260px;max-width:420px;color:var(--text);
   box-shadow:0 6px 24px rgba(2,6,23,0.6);
+}
+body.light .modal-inner{
+  box-shadow:0 6px 24px rgba(0,0,0,0.15);
 }
 .modal-inner h2{margin:0 0 12px 0;font-size:18px}
 .radios{display:flex;gap:8px;justify-content:space-between;margin-bottom:12px}
@@ -44,6 +50,7 @@ body{transition:background 240ms ease,color 240ms ease}
 .radios input{transform:scale(1.1)}
 .modal-actions{display:flex;justify-content:flex-end;gap:12px}
 .modal-actions button{padding:12px 18px;border-radius:12px;border:0;background:#0b1220;color:var(--text);cursor:pointer;font-size:16px}
+body.light .modal-actions button{background:#e8edf2;color:#071022}
 .modal-actions button#submit{background:var(--accent);color:#012;font-weight:600}
 
 /* Small screens: stack actions for better touch targets */
@@ -90,6 +97,7 @@ body{transition:background 240ms ease,color 240ms ease}
 
 /* Survey-style modal layout */
 .survey-modal{min-width:360px;max-width:840px;padding:36px 40px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.12));}
+body.light .survey-modal{background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.95));}
 .survey-modal form{display:flex;flex-direction:column;gap:20px}
 .survey-question{color:var(--text);font-size:30px;text-align:center;padding:10px 12px}
 .rating-row{display:flex;align-items:center;gap:12px}

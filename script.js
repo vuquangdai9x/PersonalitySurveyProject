@@ -118,10 +118,10 @@ function bindControls(){
   // Apply button
   if(applyBtn){
     applyBtn.addEventListener('click', ()=>{
-      if(ampInput) AMPLITUDE = Number(ampInput.value) || AMPLITUDE;
-      if(freqInput) FREQUENCY = Number(freqInput.value) || FREQUENCY;
-      if(xInput) X_RANDOMNESS = Number(xInput.value) || X_RANDOMNESS;
-      if(yInput) Y_RANDOMNESS = Number(yInput.value) || Y_RANDOMNESS;
+      if(ampInput) AMPLITUDE = Number(ampInput.value);
+      if(freqInput) FREQUENCY = Number(freqInput.value);
+      if(xInput) X_RANDOMNESS = Number(xInput.value);
+      if(yInput) Y_RANDOMNESS = Number(yInput.value);
       if(lSlider) {
         const isLight = document.body.classList.contains('light');
         if(isLight) {
