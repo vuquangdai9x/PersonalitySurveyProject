@@ -82,7 +82,7 @@ class FloatingWord{
     this.halfWidth = this.width / 2;
     this.halfHeight = this.height / 2;
   }
-  draw(time, font, color){
+  draw(time, font, color, fontSize){
     ctx.font = font;
     const x = this.baseX + AMPLITUDE_X * Math.sin(FREQUENCY_X * time + this.phaseX);
     const y = this.baseY + AMPLITUDE_Y * Math.sin(FREQUENCY_Y * time + this.phaseY);
@@ -99,12 +99,14 @@ class FloatingWord{
     this.currentX = x;
     this.currentY = y;
     
-    // Draw rating circles if rated
+    // Draw rating circles if rated (scale with font size)
     if(this.rating !== null && this.rating > 0){
-      const circleRadius = 3;
-      const circleSpacing = 8;
+      const scale = fontSize / FONT_SIZE; // scale factor relative to base font size
+      const circleRadius = 3 * scale;
+      const circleSpacing = 8 * scale;
+      const padding = 8 * scale;
       const startX = x - (this.width / 2);
-      const circleY = y + (this.height / 2) + 8;
+      const circleY = y + (this.height / 2) + padding;
       ctx.fillStyle = color;
       for(let i = 0; i < this.rating; i++){
         ctx.beginPath();
@@ -424,7 +426,7 @@ function drawFrame(now){
         else colorStr = entry.raw;
       }
     }
-    w.draw(now, font, colorStr);
+    w.draw(now, font, colorStr, fontSize);
   }
 
   requestAnimationFrame(drawFrame);
@@ -470,12 +472,17 @@ function openModalFor(word){
   modal.scrollTop = 0;
   // store current word on form
   ratingForm.dataset.word = word.text;
-  // initialize selection to default (if present) so user can reselect freely
-  // clear any previous selection first
+  // initialize selection - show previous rating if exists, otherwise default
   clearRatingSelection();
-  const def = ratingForm.querySelector('.rating-btn[data-default]');
-  if(def && def.getAttribute('data-value')){
-    setRatingSelection(def.getAttribute('data-value'));
+  if(word.rating !== null && word.rating > 0){
+    // Show previous rating
+    setRatingSelection(String(word.rating));
+  } else {
+    // Show default selection
+    const def = ratingForm.querySelector('.rating-btn[data-default]');
+    if(def && def.getAttribute('data-value')){
+      setRatingSelection(def.getAttribute('data-value'));
+    }
   }
 }
 
