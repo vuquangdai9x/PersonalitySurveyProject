@@ -10,6 +10,9 @@ let Y_RANDOMNESS = 1.0; // 0 = always center of tile on y, 1 = anywhere to tile 
 let COLORS_MAP = {};
 // lightness scaling factor 0..1 (multiplies color L component)
 let LIGHTNESS_FACTOR = 0.5;
+// configurable background colors
+let DARK_BG_COLOR = '#0f1724';
+let LIGHT_BG_COLOR = '#f7fafc';
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
@@ -109,6 +112,14 @@ async function loadConfigAndWords(){
       if(typeof cfg.xRandomness === 'number') X_RANDOMNESS = cfg.xRandomness;
       if(typeof cfg.yRandomness === 'number') Y_RANDOMNESS = cfg.yRandomness;
       if(typeof cfg.lightness === 'number') LIGHTNESS_FACTOR = cfg.lightness;
+      if(typeof cfg.darkBgColor === 'string') {
+        DARK_BG_COLOR = cfg.darkBgColor;
+        document.documentElement.style.setProperty('--bg-dark', DARK_BG_COLOR);
+      }
+      if(typeof cfg.lightBgColor === 'string') {
+        LIGHT_BG_COLOR = cfg.lightBgColor;
+        document.documentElement.style.setProperty('--bg-light', LIGHT_BG_COLOR);
+      }
       console.log('Loaded config.json', cfg);
     }
   }catch(e){

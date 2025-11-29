@@ -1,5 +1,7 @@
 ﻿:root{
-  --bg: #0f1724;
+  --bg-dark: #0f1724;
+  --bg-light: #f7fafc;
+  --bg: var(--bg-dark);
   --card: rgba(255,255,255,0.06);
   --accent: #7dd3fc;
   --text: #e6eef8;
@@ -18,7 +20,7 @@ body{
 
 /* Light theme overrides */
 body.light{
-  --bg: #f7fafc;
+  --bg: var(--bg-light);
   --card: rgba(0,0,0,0.06);
   --accent: #0ea5a8;
   --text: #071022;
