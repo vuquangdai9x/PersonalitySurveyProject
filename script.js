@@ -585,6 +585,8 @@ function submitRatingValue(value){
 canvas.addEventListener('click', (ev)=>{
   // Prevent click if it's within 500ms of a touch tap (prevents double-trigger on mobile)
   if(Date.now() - lastTapTime < 500){
+    ev.preventDefault();
+    ev.stopPropagation();
     return;
   }
   
