@@ -10,5 +10,8 @@
   "darkBgColor": "#0f1724",
   "lightBgColor": "#f7fafc",
   "glowFreq": 0.01,
-  "glowAmp": 0.05
+  "glowAmp": 0.05,
+  "fontSize": 24,
+  "ratedSizeMultiplier": 2.0,
+  "ratedLightnessBoost": 0.2
 }

@@ -20,6 +20,10 @@ let LIGHT_BG_COLOR = '#f7fafc';
 // glow effect settings
 let GLOW_FREQ = 0.001; // frequency of lightness oscillation
 let GLOW_AMP = 0.15; // amplitude of lightness change (0-1)
+// font and rated word styling
+let FONT_SIZE = 24; // base font size in pixels
+let RATED_SIZE_MULTIPLIER = 2.0; // size multiplier for rated words
+let RATED_LIGHTNESS_BOOST = 0.2; // additional lightness for rated words
 
 const wordsList = [
   "time","person","year","way","day","thing","man","world","life","hand",
@@ -129,6 +133,10 @@ const xInput = document.getElementById('xInput');
 const yInput = document.getElementById('yInput');
 const glowFreqInput = document.getElementById('glowFreqInput');
 const glowAmpInput = document.getElementById('glowAmpInput');
+const fontSizeInput = document.getElementById('fontSizeInput');
+const ratedSizeInput = document.getElementById('ratedSizeInput');
+const ratedLightSlider = document.getElementById('ratedLightSlider');
+const ratedLightVal = document.getElementById('ratedLightVal');
 const lSlider = document.getElementById('lSlider');
 const lVal = document.getElementById('lVal');
 const applyBtn = document.getElementById('applyBtn');
@@ -145,9 +153,19 @@ function bindControls(){
     });
   }
   
+  // Rated lightness boost slider live display
+  if(ratedLightSlider && ratedLightVal){
+    ratedLightSlider.addEventListener('input', ()=>{
+      ratedLightVal.textContent = Number(ratedLightSlider.value).toFixed(2);
+    });
+  }
+  
   // Apply button
   if(applyBtn){
     applyBtn.addEventListener('click', ()=>{
+      // Save current ratings before regenerating
+      const savedRatings = words.map(w => ({text: w.text, rating: w.rating})).filter(r => r.rating !== null);
+      
       if(ampXInput) AMPLITUDE_X = Number(ampXInput.value);
       if(ampYInput) AMPLITUDE_Y = Number(ampYInput.value);
       if(freqXInput) FREQUENCY_X = Number(freqXInput.value);
@@ -156,6 +174,9 @@ function bindControls(){
       if(yInput) Y_RANDOMNESS = Number(yInput.value);
       if(glowFreqInput) GLOW_FREQ = Number(glowFreqInput.value);
       if(glowAmpInput) GLOW_AMP = Number(glowAmpInput.value);
+      if(fontSizeInput) FONT_SIZE = Number(fontSizeInput.value);
+      if(ratedSizeInput) RATED_SIZE_MULTIPLIER = Number(ratedSizeInput.value);
+      if(ratedLightSlider) RATED_LIGHTNESS_BOOST = Number(ratedLightSlider.value);
       if(lSlider) {
         const isLight = document.body.classList.contains('light');
         if(isLight) {
@@ -167,7 +188,13 @@ function bindControls(){
         }
       }
       // Recompute positions with new settings
-      loadConfigAndWords();
+      loadConfigAndWords().then(() => {
+        // Restore ratings after regenerating
+        savedRatings.forEach(saved => {
+          const word = words.find(w => w.text === saved.text);
+          if(word) word.rating = saved.rating;
+        });
+      });
     });
   }
   
@@ -221,6 +248,10 @@ async function loadConfig(){
       if(yInput) yInput.value = Y_RANDOMNESS;
       if(glowFreqInput) glowFreqInput.value = GLOW_FREQ;
       if(glowAmpInput) glowAmpInput.value = GLOW_AMP;
+      if(fontSizeInput) fontSizeInput.value = FONT_SIZE;
+      if(ratedSizeInput) ratedSizeInput.value = RATED_SIZE_MULTIPLIER;
+      if(ratedLightSlider) ratedLightSlider.value = RATED_LIGHTNESS_BOOST;
+      if(ratedLightVal) ratedLightVal.textContent = Number(RATED_LIGHTNESS_BOOST).toFixed(2);
       if(lSlider) lSlider.value = LIGHTNESS_FACTOR;
       if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
       if(typeof cfg.darkBgColor === 'string') {
@@ -233,6 +264,9 @@ async function loadConfig(){
       }
       if(typeof cfg.glowFreq === 'number') GLOW_FREQ = cfg.glowFreq;
       if(typeof cfg.glowAmp === 'number') GLOW_AMP = cfg.glowAmp;
+      if(typeof cfg.fontSize === 'number') FONT_SIZE = cfg.fontSize;
+      if(typeof cfg.ratedSizeMultiplier === 'number') RATED_SIZE_MULTIPLIER = cfg.ratedSizeMultiplier;
+      if(typeof cfg.ratedLightnessBoost === 'number') RATED_LIGHTNESS_BOOST = cfg.ratedLightnessBoost;
       console.log('Loaded config.json', cfg);
     }
   }catch(e){
@@ -292,7 +326,7 @@ async function loadConfigAndWords(){
 
   // tiled positions with configurable randomness
   const margin = 18;
-  const fontSize = Math.max(12, Math.min(28, Math.round(window.innerWidth / 40)));
+  const fontSize = FONT_SIZE;
   const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
 
   // clamp randomness to 0..20 (slider ranges 0..20)
@@ -339,14 +373,22 @@ function drawFrame(now){
   const t = now - start;
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const fontSize = Math.max(12, Math.min(28, Math.round(window.innerWidth / 40)));
-  const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
+  const baseFontSize = FONT_SIZE;
 
   // draw words, using AMPLITUDE & FREQUENCY loaded from config
   for(const w of words){
+    // Determine font size based on rating
+    const fontSize = w.rating !== null ? baseFontSize * RATED_SIZE_MULTIPLIER : baseFontSize;
+    const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
+    
     // calculate glow effect (sine wave modulating lightness)
     const glowOffset = Math.sin(GLOW_FREQ * now + w.glowPhase) * GLOW_AMP;
-    const effectiveLightness = Math.max(0, Math.min(1, LIGHTNESS_FACTOR + glowOffset));
+    let effectiveLightness = Math.max(0, Math.min(1, LIGHTNESS_FACTOR + glowOffset));
+    
+    // Add lightness boost for rated words
+    if(w.rating !== null){
+      effectiveLightness = Math.min(1, effectiveLightness + RATED_LIGHTNESS_BOOST);
+    }
     
     // determine color for this word (match by lowercased text)
     const key = (w.text || '').toLowerCase();
