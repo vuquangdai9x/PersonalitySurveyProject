@@ -10,7 +10,7 @@
 html,body{height:100%}
 body{
   margin:0;
-  background:linear-gradient(180deg,var(--bg),#071022);
+  background:var(--bg);
   color:var(--text);
   font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
