@@ -583,6 +583,11 @@ function submitRatingValue(value){
 }
 
 canvas.addEventListener('click', (ev)=>{
+  // Prevent click if it's within 500ms of a touch tap (prevents double-trigger on mobile)
+  if(Date.now() - lastTapTime < 500){
+    return;
+  }
+  
   const pos = getCanvasPos(ev);
   const worldPos = screenToWorld(pos.x, pos.y);
   for(let i=words.length-1;i>=0;i--){
@@ -598,6 +603,21 @@ cancelBtn.addEventListener('click', ()=>{
   modal.classList.add('hidden');
   clearRatingSelection();
 });
+
+// Clear rating button
+const clearRatingBtn = document.getElementById('clear-rating');
+if(clearRatingBtn){
+  clearRatingBtn.addEventListener('click', ()=>{
+    const word = ratingForm.dataset.word || '';
+    const wordObj = words.find(w => w.text === word);
+    if(wordObj){
+      wordObj.rating = null; // Clear the rating
+      console.log('Rating cleared for:', word);
+    }
+    modal.classList.add('hidden');
+    clearRatingSelection();
+  });
+}
 
 // clicking on overlay (outside modal-inner) should act like Cancel
 modal.addEventListener('click', (ev)=>{
@@ -714,6 +734,8 @@ let touchState = {
   initialDistance: 0
 };
 
+let lastTapTime = 0; // Track last tap to prevent click event after touch
+
 canvas.addEventListener('touchstart', (ev)=>{
   if(ev.touches.length === 1){
     // Single touch - could be tap or pan
@@ -802,6 +824,7 @@ canvas.addEventListener('touchend', (ev)=>{
       
       if(moveDistance < 10){
         // It's a tap - check for word click
+        lastTapTime = Date.now(); // Mark tap time to prevent click event
         const rect = canvas.getBoundingClientRect();
         const canvasX = touchState.startPos.x - rect.left;
         const canvasY = touchState.startPos.y - rect.top;

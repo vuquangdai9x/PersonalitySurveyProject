@@ -79,8 +79,15 @@ body.light .modal-actions button{background:#e8edf2;color:#071022}
 #control-panel{
   position:fixed;top:70px;right:16px;background:rgba(255,255,255,0.09);backdrop-filter:blur(8px);
   color:var(--text);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.5);z-index:60;width:220px;font-size:13px;
-  transition:all 200ms ease
+  transition:all 200ms ease;
+  max-height:calc(100vh - 90px);
+  overflow-y:auto;
+  overflow-x:hidden;
 }
+#control-panel::-webkit-scrollbar{width:6px}
+#control-panel::-webkit-scrollbar-track{background:rgba(0,0,0,0.2);border-radius:3px}
+#control-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:3px}
+#control-panel::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.3)}
 #control-panel label{display:block;margin-top:12px;font-weight:500}
 #control-panel label:first-child{margin-top:0}
 #control-panel input[type=number]{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);color:var(--text);font-size:14px;margin-top:4px}
