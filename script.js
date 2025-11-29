@@ -295,12 +295,6 @@ let start = performance.now();
 function drawFrame(now){
   const t = now - start;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // background subtle gradient
-  const g = ctx.createLinearGradient(0,0,0,canvas.height/DPR);
-  g.addColorStop(0, 'rgba(255,255,255,0.02)');
-  g.addColorStop(1, 'rgba(0,0,0,0.02)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,canvas.width/DPR,canvas.height/DPR);
 
   const fontSize = Math.max(12, Math.min(28, Math.round(window.innerWidth / 40)));
   const font = `${fontSize}px system-ui,Segoe UI,Roboto,Arial`;
