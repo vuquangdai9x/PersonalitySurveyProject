@@ -103,6 +103,8 @@ const ampInput = document.getElementById('ampInput');
 const freqInput = document.getElementById('freqInput');
 const xInput = document.getElementById('xInput');
 const yInput = document.getElementById('yInput');
+const glowFreqInput = document.getElementById('glowFreqInput');
+const glowAmpInput = document.getElementById('glowAmpInput');
 const lSlider = document.getElementById('lSlider');
 const lVal = document.getElementById('lVal');
 const applyBtn = document.getElementById('applyBtn');
@@ -126,6 +128,8 @@ function bindControls(){
       if(freqInput) FREQUENCY = Number(freqInput.value);
       if(xInput) X_RANDOMNESS = Number(xInput.value);
       if(yInput) Y_RANDOMNESS = Number(yInput.value);
+      if(glowFreqInput) GLOW_FREQ = Number(glowFreqInput.value);
+      if(glowAmpInput) GLOW_AMP = Number(glowAmpInput.value);
       if(lSlider) {
         const isLight = document.body.classList.contains('light');
         if(isLight) {
@@ -185,6 +189,8 @@ async function loadConfig(){
       if(freqInput) freqInput.value = FREQUENCY;
       if(xInput) xInput.value = X_RANDOMNESS;
       if(yInput) yInput.value = Y_RANDOMNESS;
+      if(glowFreqInput) glowFreqInput.value = GLOW_FREQ;
+      if(glowAmpInput) glowAmpInput.value = GLOW_AMP;
       if(lSlider) lSlider.value = LIGHTNESS_FACTOR;
       if(lVal) lVal.textContent = Number(LIGHTNESS_FACTOR).toFixed(2);
       if(typeof cfg.darkBgColor === 'string') {

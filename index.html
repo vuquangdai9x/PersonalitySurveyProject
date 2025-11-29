@@ -11,7 +11,7 @@
   <button id="themeToggle" title="Toggle light/dark">🌗</button>
   
   <div id="control-panel" aria-hidden="false">
-    <button id="panelToggle" aria-expanded="true" class="panel-toggle">☰</button>
+    <button id="panelToggle" aria-expanded="true" class="panel-toggle">✖</button>
     <div id="panel-body">
       <label>Amplitude:
         <input id="ampInput" type="number" step="0.1" value="18" class="float-input">
@@ -27,6 +27,14 @@
       
       <label>Y Randomness:
         <input id="yInput" type="number" step="0.1" value="1.0" class="float-input">
+      </label>
+      
+      <label>Glow Frequency:
+        <input id="glowFreqInput" type="number" step="0.0001" value="0.001" class="float-input">
+      </label>
+      
+      <label>Glow Amplitude:
+        <input id="glowAmpInput" type="number" step="0.01" value="0.15" class="float-input">
       </label>
       
       <label>Lightness: <span id="lVal">0.50</span></label>
